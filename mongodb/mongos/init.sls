@@ -66,8 +66,7 @@ mongos_configuration:
     - context:
         logfile: {{ log_file }}
         port: {{ settings.get('port', 27017) }}
-        config_svrs: {% for server, addrs in salt['mine.get']('roles:mongoconfigsrv', 'network.ip_addrs', expr_form='grain').items() %} {{ addrs[0] }}:27017,{% endfor %} 
-
+        config_svrs: {% for server, addrs in salt['mine.get']('roles:mongoconfigsrv', 'network.ip_addrs', expr_form='grain').items() %}{{ addrs[0] }}:27017{% if loop.last %}{% else %},{% endif %}{% endfor %} 
 mongos_logrotate:
   file.managed:
     - name: /etc/logrotate.d/mongos
