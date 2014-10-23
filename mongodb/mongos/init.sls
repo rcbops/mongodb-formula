@@ -26,6 +26,10 @@ mongos_package:
      - name: mongos
     {% endif %}
 
+mongodb_client:
+  pkg.installed:
+    - name: mongodb-clients
+
 mongos_log_file:
   file.directory:
     - name: {{ log_path }}
