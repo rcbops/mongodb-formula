@@ -26,10 +26,6 @@ mongos_package:
      - name: mongos
     {% endif %}
 
-mongodb_client:
-  pkg.installed:
-    - name: mongodb-clients
-
 mongos_log_file:
   file.directory:
     - name: {{ log_path }}
@@ -79,6 +75,9 @@ mongos_logrotate:
     - group: root
     - mode: 440
     - source: salt://mongodb/mongos/files/logrotate.jinja
+mongodb_client:
+  pkg.installed:
+    - name: mongodb-clients
     
 mongos_create_cluster_js:
   file.managed:
@@ -88,7 +87,7 @@ mongos_create_cluster_js:
     
 mongos_create_cluster:
   cmd.run:
-    - name: mongo /etc/mongodb_create_cluster.js
+    - name: mongo /etc/mongodb_create_cluster.js >> /tmp/mongocluster.txt
     - cwd: /
     - stateful: True
 
