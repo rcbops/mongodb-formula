@@ -79,5 +79,17 @@ mongos_logrotate:
     - group: root
     - mode: 440
     - source: salt://mongodb/mongos/files/logrotate.jinja
+    
+mongos_create_cluster_js:
+  file.managed:
+    - name: /etc/mongodb_create_cluster.js
+    - source: salt://mongodb/mongos/files/createcluster.jinja
+    - template: jinja
+    
+mongos_create_cluster:
+  cmd.run:
+    - name: mongo /etc/mongodb_create_cluster.js
+    - cwd: /
+    - stateful: True
 
 {% endif %}
