@@ -1,0 +1,5 @@
+// add mongodb shards to the cluster:
+db = db.getSiblingDB('admin');
+db.runCommand({addShard: "10.10.10.5:27027"});
+db.runCommand({addShard: "10.10.10.6:27027"});
+
