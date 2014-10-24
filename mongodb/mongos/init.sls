@@ -75,6 +75,7 @@ mongos_logrotate:
     - group: root
     - mode: 440
     - source: salt://mongodb/mongos/files/logrotate.jinja
+    
 mongodb_client:
   pkg.installed:
     - name: mongodb-clients
@@ -87,8 +88,8 @@ mongos_create_cluster_js:
     
 mongos_create_cluster:
   cmd.run:
-    - name: mongo /etc/mongodb_create_cluster.js >> /tmp/mongocluster.txt
+    - name: 'mongo {% for server, addrs in salt['mine.get']('roles:mongos', 'network.ip_addrs', expr_form='grain').items() %}{% if loop.first %}{{ addrs[0] }}{% endif %}{% endfor %}:27017/admin /etc/mongodb_create_cluster.js >> /tmp/mongocluster.txt'
     - cwd: /
     - stateful: True
-
+    
 {% endif %}
