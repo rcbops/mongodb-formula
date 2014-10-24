@@ -1,4 +1,4 @@
 // add mongodb shards to the cluster:
 {% for ip in mongodb_ips %}
-  db.runCommnad({addShard: "{{ip}}:27027"});
+  db.runCommnad({addShard: "{{ip}}:27017"});
 {% endfor %}
