@@ -1,5 +1,4 @@
 // add mongodb shards to the cluster:
-db = db.getSiblingDB('admin');
-db.runCommand({addShard: "10.10.10.5:27027"});
-db.runCommand({addShard: "10.10.10.6:27027"});
-
+{% for ip in mongodb_ips %}
+  db.runCommnad({addShard: "{{ip}}:27027"});
+{% endfor %}
