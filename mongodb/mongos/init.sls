@@ -2,6 +2,7 @@
 
 {% set version        = salt['pillar.get']('mongodb:version', none) %}
 {% set package_name   = salt['pillar.get']('mongos:package_name', "mongodb-org-mongos") %}
+{% set replica_set    = salt['pillar.get']('mongodb:replica_set', none) %}
 
 {% if version is not none %}
 
@@ -88,6 +89,7 @@ mongos_create_cluster_js:
     - template: jinja
     - context:
        mongodb_ips: [{%  for server, addrs in salt['mine.get']('roles:mongodb', 'network.ip_addrs', expr_form='grain').items() %}{{ addrs[0] }}{% if loop.last %}{% else %},{% endif %} {% endfor %}]
+       replica_set: {{ replica_set }}
 
 mongos_create_cluster:
   cmd.run:
