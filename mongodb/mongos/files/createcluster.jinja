@@ -1,4 +1,2 @@
 // add mongodb shards to the cluster:
-{% for ip in mongodb_ips %}
-  db.runCommand({addShard: "{{replica_set}}/{{ip}}:27017"});
-{% endfor %}
+db.runCommand({addShard: "{{mongodb_ips}}"});

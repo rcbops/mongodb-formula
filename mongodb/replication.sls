@@ -11,3 +11,4 @@ mongodb_set_replication:
     - name: 'mongo {% for server, addrs in salt['mine.get']('roles:mongodb', 'network.ip_addrs', expr_form='grain').items() %}{% if loop.first %}{{ addrs[0] }}{% endif %}{% endfor %}:27017 /etc/mongodb_set_replication.js >> /tmp/mongoreplication.txt'
     - cwd: /
     - stateful: True
+    
