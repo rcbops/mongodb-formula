@@ -1,6 +1,0 @@
-rs.initiate();
-rs.conf();
-{% for ip in mongodb_ips %}
-  rs.add("{{ip}}:27017");
-{% endfor %}
-rs.status();

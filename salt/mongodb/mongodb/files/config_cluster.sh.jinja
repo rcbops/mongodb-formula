@@ -1,0 +1,52 @@
+#!/bin/bash
+{% set rs_name = salt["grains.get"]("replica_set","rs0") -%}
+{% set interfaces = salt["mine.get"]("replica_set:" + rs_name, "network.interfaces", "grain").values() -%}
+{% set mongodb_pub_interface = salt["pillar.get"]("mongodb:public_interface","eth0") -%}
+{% set mongodb_ips = [] -%}
+{% for interface in interfaces -%}
+    {% do mongodb_ips.append(interface[mongodb_pub_interface]['inet'][0]['address']) -%}
+{% endfor %}
+{% set mongodb_ips_sorted = mongodb_ips|sort %}
+
+primaryip={{ mongodb_ips_sorted[0]}}
+myip={{ salt["network.ipaddrs"]( salt["pillar.get"]("mongodb:public_interface","eth0") )[0]  }}
+replset_name={{ rs_name  }}
+
+{% set mongos_interfaces = salt["mine.get"]("roles:mongodb.mongos", "network.interfaces", "grain").values() -%}
+{% set mongos_pub_interface = salt["pillar.get"]("mongos:public_interface","eth0") -%}
+{% set mongos_ips = [] -%}
+{% for interface in mongos_interfaces -%}
+    {% do mongos_ips.append(interface[mongos_pub_interface]['inet'][0]['address']) -%}
+{% endfor %}
+{% set mongos_ips_sorted = mongos_ips|sort %}
+
+mongosip={{ mongos_ips_sorted[0]  }}
+[[ $myip == $primaryip ]] && i_am_primary=true || i_am_primary=false
+
+
+if [[ $i_am_primary == true ]]; then
+    
+    # Wait for mongodb to be running and then create the replica shard
+    while [[ $(netstat -ntpl | grep $myip | grep mongod | wc -l) -ne 1 ]]; do
+        sleep 5
+    done
+    mongo $primaryip --eval 'rs.initiate()'
+    # Wait for the secondaries to come up
+    while [[ $(mongo $primaryip --eval 'printjson(rs.status())' | grep '_id' | wc -l) -ne {{ mongodb_ips|count }} ]]; do
+        sleep 5
+    done
+    [[ $(mongo $mongosip --eval 'printjson(sh.status())' | grep "\"_id\" : \"$replset_name\"" | wc -l) -eq 0 ]] && mongo $mongosip --eval "sh.addShard(\"$replset_name/$myip\")"
+else
+    # Wait for the primary to create the replica shard
+    while [[ $(mongo $primaryip --eval 'rs.conf()' | grep null | wc -l) -eq 1 ]]; do
+        sleep 5
+    done
+    # Add myself to the replica set if not added already
+    while [[ $(mongo $primaryip --eval 'printjson(rs.status())' | grep name | grep $myip | wc -l) -eq 0 ]]; do 
+        mongo $primaryip --eval "rs.add(\"$myip\")"
+        sleep 5
+    done
+fi
+
+
+

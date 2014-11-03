@@ -1,0 +1,10 @@
+# This file is managed by salt. If you make changes, you're gonna have a bad time
+{% set mongos_port = salt["pillar.get"]("mongos:port","27017") -%}
+{% set configserver_interface = salt["pillar.get"]("cofigserver:public_interface","eth0") -%}
+{% set configserver_port = salt["pillar.get"]("configserver:port","27019")  -%}
+{% set interfaces = salt["mine.get"]("roles:mongodb.configserver", "network.interfaces", "grain").values() -%}
+{% set configserver_ips = [] -%}
+{% for interface in interfaces -%}
+    {% do configserver_ips.append(interface[configserver_interface]['inet'][0]['address'] + ":" + configserver_port|string) -%}
+{% endfor %}
+DAEMON_OPTS="--configdb {{ configserver_ips|join(',') }} --port {{ mongos_port }}"

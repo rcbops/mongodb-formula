@@ -1,0 +1,4 @@
+# This file is managed by salt. If you make changes, you're gonna have a bad time
+
+DAEMON_OPTS="--config /etc/mongod.conf"
+
